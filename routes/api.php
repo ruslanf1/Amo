@@ -20,4 +20,6 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 });
 
 Route::get('/amo/auth', [AmoController::class, 'amoKey']);
-Route::get('/amo/get', [AmoController::class, 'getAmo']);
+Route::get('/amo/get-key', [AmoController::class, 'getKey']);
+Route::get('/amo/get-contacts', [AmoController::class, 'getContacts']);
+Route::get('amo/test', [AmoController::class, 'test']);

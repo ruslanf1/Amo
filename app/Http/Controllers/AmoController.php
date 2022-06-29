@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\AmoModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use Mockery\Exception;
 
 class AmoController extends Controller
 {
@@ -14,7 +15,7 @@ class AmoController extends Controller
             'client_id' => '032f5287-ec0e-4125-b2f1-88ccf0d901c4',
             'client_secret' => 'r4ioF1B2yH9IgIfnJgx7hjKXuGiTWIxK0gmCBsDzUo022buz49luj00ht1NsN08D',
             'grant_type' => 'authorization_code',
-            'code' => 'def5020034582af0c75e2f70ffb71d9ffecb95efb9e6afd0ce39f17e5250dc8878759f9da9e7b5db4866babf070dfa382a159849723edb67d2d28ea7ec04c277d93051663c875283909e6d76a4f0b7c7df8ee7e189be562243cc420a52a9b6cdca0f73832b6b50c99b2a4259ebf977cfaabfd6b847197e537eb55a38049dcddfde93f5f9baa6a6d7ed59778665df610401e13c56e049209c471bec6a72a6e1cc3d63f8e5f3ea4fcb5984c0bfbe5b602177ee8a971aea646902e12a453d0be3f7bc9d89f54af9da52fbe59624f0b386c92ca4bd22143ce576749bec1275c90103e1423a8f984bb5a64f4697ed5187448e90047cd85ab5b150b9948d3dfd8e53e322ba58af2b13d5dc8a1a04640b046cbf637dd1ff1a007283b550b41bfbaf4a632bb1cf6deda084c0f2aeea1255fbae78bc0d48ab3c8a069d37a01bd623ca99cb6e2d490324b32b390aebce8673b20737384bde8532326d19aa13e5d12d708f202b59771859587628f3dfd1e486b932a5c1d5d388e59b1f446caed489229b5cb4f898858fbfb612688460e309fbfef3cffd45231131d313d7b95ce5b6c2cdc9fa9e1693cd5fa3f23e46bc6535e2ca695c2ea3458c56bc04dc1024e40828675af141b6c97da44880b10c1e7397a39f6e0fdd5559b112032b3d87b7a87cb799886edc69b165a7bb625cfe',
+            'code' => 'def502007f4fa6a859dc3aeb939f99784cfde8bf8ccd48cefd52578c905a8c9d27ef83a3219fb378abd3f1d202af6185a8f5e5046a16d98e6275251143e5fbcf581ab957e2848449bfe2989afd770eed01f3fb4d5a55b0097882e433c5dd5e3900809abd677240c28cf4b51d4486a31a306036304d69735f38f279d7e8ddc758b9d43153155cfe18a5be6310c20ce801db35ad47e8168b0b9fbebc8383a72ba9e8807c130fa083fe40a5c25aace492de2e1418988c4b980790eda320027700f1f75232c490e04faf86c373ddf556e1bf893ca565112ae117b55f4fd655c28d20f6c6bdfc9d6bdad118f89b5d8052c13fc461f5fd6cf70b0444e96021fa8757b2441f29b9eb88a3e416f9d0306d935f9150f1626d56623bbc8dba07356f518b8606a1ba5aae66a8a4d364f8f91b2f931d16042eb26ceee07d2471cf73fcfa0ef9630005a16a92b7b954b9c536a30da90b5762273e9e41efe1090ea10ad28f3c8c36b7ee807a9b01e0088017d0691bf824ca9242bd8c58e3b1be9f47ea8a7538f1081a63934b671a57ef468a1617e0b2c3eb1246f383692563d1bd2466ab25f9de545d7b710fcc1814906305b774a863d840c01dfb8734036848e90a05f111d36ead8cb8b6b6f5934cc28388aab1c3bc215527f3a15505849398ed54fd2be3cbcf684b8370170032f700',
             'redirect_uri' => 'https://lessons.ruslanf1.keenetic.link/'
         ];
         $domain = config('app.amoDomain');
@@ -34,20 +35,20 @@ class AmoController extends Controller
         }
     }
 
-    public function getAmo() {
+    public function getKey() {
         $amo = AmoModel::find(1);
         if($amo['expires_in'] <= time()) {
-            $newAmo = $this->editAmo($amo['refresh_token']);
-            return $newAmo['access_token'];
+            $newKey = $this->editKey($amo['refresh_token']);
+            return $newKey['access_token'];
         } else {
             return $amo['access_token'];
         }
     }
 
-    public function editAmo($refresh_token) {
+    public function editKey($refresh_token) {
         $data = [
-            'client_id' => '82281748-6462-4b05-9497-12fbef801743',
-            'client_secret' => 'rU3CK0kjMVIqNajlpRB5E1Un4NyczMT2fqH5leHQgAVdlLAxNMilliX7Q1cIyEYC',
+            'client_id' => '032f5287-ec0e-4125-b2f1-88ccf0d901c4',
+            'client_secret' => 'r4ioF1B2yH9IgIfnJgx7hjKXuGiTWIxK0gmCBsDzUo022buz49luj00ht1NsN08D',
             'grant_type' => 'refresh_token',
             'refresh_token' => $refresh_token,
             'redirect_uri' => 'https://lessons.ruslanf1.keenetic.link/'
@@ -67,5 +68,34 @@ class AmoController extends Controller
         } else {
             return 0;
         }
+    }
+
+    public function getContacts() {
+        $accessToken = $this->getKey();
+        $domain = config('app.amoDomain');
+        $response = Http::withHeaders(["Authorization" => "Bearer " . $accessToken, "Content-Type" => "application/json"])
+            ->get("https://{$domain}.amocrm.ru/api/v4/contacts");
+        return $response;
+    }
+
+    public function test() {
+        $accessToken = $this->getKey();
+        $data = [
+            [
+                "id" => 18559111,
+                "name" => "Сделка для примера 1213",
+                "price" => 19999,
+            ],
+            [
+                "id" => 18559109,
+                "name" => "Сделка для примера 23234",
+                "price" => 40000,
+            ]
+        ];
+
+        $domain = config('app.amoDomain');
+        $response = Http::withHeaders(["Authorization" => "Bearer " . $accessToken, "Content-Type" => "application/json"])
+            ->patch("https://{$domain}.amocrm.ru/api/v4/leads", $data);
+        return $response;
     }
 }
