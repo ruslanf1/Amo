@@ -59,7 +59,7 @@ class AmoController extends Controller
         if(isset($response['access_token']) && $response['access_token'] != '' &&
             isset($response['refresh_token']) && $response['refresh_token'] != '' &&
             isset($response['expires_in']) && $response['expires_in'] > 0 ) {
-            $amoModel = new AmoModel(1);
+            $amoModel = AmoModel::find(1);;
             $amoModel->__set('access_token', $response['access_token']);
             $amoModel->__set('refresh_token', $response['refresh_token']);
             $amoModel->__set('expires_in', time() + $response['expires_in']);
@@ -70,32 +70,50 @@ class AmoController extends Controller
         }
     }
 
-    public function getContacts() {
-        $accessToken = $this->getKey();
-        $domain = config('app.amoDomain');
-        $response = Http::withHeaders(["Authorization" => "Bearer " . $accessToken, "Content-Type" => "application/json"])
-            ->get("https://{$domain}.amocrm.ru/api/v4/contacts");
-        return $response;
-    }
-
     public function test() {
         $accessToken = $this->getKey();
         $data = [
             [
-                "id" => 18559111,
-                "name" => "Сделка для примера 1213",
-                "price" => 19999,
-            ],
-            [
-                "id" => 18559109,
-                "name" => "Сделка для примера 23234",
+                "name" => 'Название сделки 1',
                 "price" => 40000,
+                "_embedded" => [
+                    "contacts" => [
+                        [
+                            "first_name" => "Руслан",
+                            "custom_fields_values" => [
+                                [
+                                    "field_code" => "EMAIL",
+                                    "values" => [
+                                        [
+                                            "enum_code" => "WORK",
+                                            "value" => "myagkikh87@mail.ru"
+                                        ]
+                                    ]
+                                ],
+                                [
+                                    "field_code" => "PHONE",
+                                    "values" => [
+                                        [
+                                            "enum_code" => "WORK",
+                                            "value" => 89996334122
+                                        ]
+                                    ]
+                                ]
+                            ]
+                        ]
+                    ],
+                    "companies" => [
+                        [
+                            "name" => "Рога и копыта"
+                        ]
+                    ]
+                ],
             ]
         ];
 
         $domain = config('app.amoDomain');
         $response = Http::withHeaders(["Authorization" => "Bearer " . $accessToken, "Content-Type" => "application/json"])
-            ->patch("https://{$domain}.amocrm.ru/api/v4/leads", $data);
+            ->post("https://{$domain}.amocrm.ru/api/v4/leads/complex", $data);
         return $response;
     }
 }
