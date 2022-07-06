@@ -36,13 +36,21 @@ class AmoController extends Controller
     }
 
     public function getKey() {
-        $amo = AmoModel::find(1);
-        if($amo['expires_in'] <= time()) {
-            $newKey = $this->editKey($amo['refresh_token']);
-            return $newKey['access_token'];
-        } else {
-            return $amo['access_token'];
+        try {
+            $amo = AmoModel::find(1);
+            if(isset($amo['expires_in']) && $amo['expires_in'] <= time()) {
+                $newKey = $this->editKey($amo['refresh_token']);
+                return $newKey['access_token'];
+            } else {
+                return $amo['access_token'];
+            }
+        } catch (\Exception) {
+            return response()->json([
+                'code' => 404,
+                'text'=> 'Not Found'
+            ], 404);
         }
+
     }
 
     public function editKey($refresh_token) {
